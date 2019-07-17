@@ -13,8 +13,9 @@ import judge_model as judge
 import data
 import pandas as pd
 
+# test this method in prediction methods
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM classification Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
+parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
@@ -48,7 +49,7 @@ parser.add_argument('--tied', action='store_true',
                     help='tie the word embedding and softmax weights')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
-parser.add_argument('--cuda', action='store_true',
+parser.add_argument('--cuda', action='store_false',
                     help='use CUDA')
 parser.add_argument('--log_interval', type=int, default=10, metavar='N',
                     help='report interval')
@@ -93,8 +94,8 @@ if dic_exists:
 else:
     Corpus_Dic = data.Dictionary()
 
-labeled_train_data_name = os.path.join(args.data, str(args.number_per_class)+'_labeled_train.csv')
-unlabeled_train_data_name = os.path.join(args.data, str(args.number_per_class)+'_unlabeled_train.csv')
+labeled_train_data_name = os.path.join(args.data, 'train.csv')
+unlabeled_train_data_name = os.path.join(args.data, 'unlabeled.csv')
 test_data_name = os.path.join(args.data, 'test.csv')
 
 labeled_train_data = data.Csv_DataSet(labeled_train_data_name)
@@ -181,6 +182,7 @@ def one_hot_embedding(labels, num_classes):
     return y[labels]
 
 
+# discriminator is the classifier
 def dis_pre_train_step():
     discriminator.train()
     lab_token_seqs, _, _, labels, lab_seq_lengths, _ = next(labeled_train_loader)

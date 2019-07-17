@@ -22,7 +22,7 @@ class RNNModel(nn.Module):
 
         # Optionally tie weights as in:
         # "Using the Output Embedding to Improve Language Models" (Press & Wolf 2016)
-        # https://arxiv.org/abs/1608.05859
+        # https://arxiv.orgda/abs/1608.05859
         # and
         # "Tying Word Vectors and Word Classifiers: A Loss Framework for Language Modeling" (Inan et al. 2016)
         # https://arxiv.org/abs/1611.01462
@@ -48,6 +48,7 @@ class RNNModel(nn.Module):
         output, hidden = self.rnn(emb, hidden)
         output = self.drop_out(output)
         decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
+        # generate the sequence features by the language model
         return decoded.view(output.size(0), output.size(1), decoded.size(1)), hidden
 
     def init_hidden(self, bsz):

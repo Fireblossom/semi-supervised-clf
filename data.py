@@ -5,6 +5,7 @@ import sys
 import csv
 import numpy as np
 import re
+import texar as tx
 csv.field_size_limit(sys.maxsize)
 
 
@@ -20,7 +21,7 @@ class Dictionary(object):
         return self.word2idx[word]
 
     def __len__(self):
-        return len(self.idx2word)
+        return len(self.word2idx)
 
 
 def split_by_punct(segment):
@@ -38,28 +39,37 @@ class Csv_DataSet(Dataset):
         self.labels = []  # used to store the label information
         self.length = 0
 
-    def load(self, lowercase=True, dictionary=None,train_mode=True):
+
+    def load(self, lowercase=True, dictionary=None,train_mode=True, max_vocab_size=10000):
+        if len(dictionary) == 0 and train_mode:
+            vocab_dic = tx.data.make_vocab(filenames=self.file, max_vocab_size=max_vocab_size, return_type='dict', newline_token=tx.data.SpecialTokens.EOS)
+            dictionary.word2idx = vocab_dic
+
+
+
         with open(self.file) as db_f:
             reader = csv.reader(db_f)
             next(reader)  # skip header
             for idx, row in enumerate(reader):
                 # get actions
-                content = row[1]+' '+row[2]
+                content = row[1]
                 content = content.strip()
                 if lowercase:
                     content = content.lower()
-                txt = split_by_punct(content) + ['<eos>']
+                txt = split_by_punct(content)
                 token = []
                 for word in txt:
                     # Add words to the dictionary in train_mode
-                    if train_mode:
-                        dictionary.add_word(word)
-                        # Tokenize file content
+                    # if train_mode:
+                    #     dictionary.add_word(word)
+                    #     # Tokenize file content
+                    #     token.append(dictionary.word2idx[word])
+                    # else:
+                    if word in dictionary.word2idx:
                         token.append(dictionary.word2idx[word])
-                    else:
-                        if word in dictionary.word2idx:
-                            token.append(dictionary.word2idx[word])
                 # get id
+                if len(token) < 1:
+                    continue
                 self.labels.append(int(row[0])-1)
                 self.tokens.append(token)
             self.length = len(self.labels)
@@ -69,7 +79,10 @@ class Csv_DataSet(Dataset):
 
     def __getitem__(self, index):
         token_seq = np.array(self.tokens[index], dtype=int)
-        is_meaningful = np.ones(len(self.tokens[index])-1)
+        try:
+            is_meaningful = np.ones(len(self.tokens[index])-1)
+        except:
+            th = len(self.tokens[index])
         label = self.labels[index]
         return token_seq, label, is_meaningful
 

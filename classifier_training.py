@@ -13,7 +13,7 @@ import data
 import pandas as pd
 
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM classification Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
+parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
@@ -80,11 +80,14 @@ if torch.cuda.is_available():
     if not args.cuda:
         print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
+
 device = torch.device("cuda" if args.cuda else "cpu")
 
 ###############################################################################
 # Load data
 ###############################################################################
+
+# Just add a text generator -> generate the text based on the input dataset
 dic_exists = os.path.isfile(os.path.join(args.data, 'action_dictionary.pkl'))
 if dic_exists:
     with open(os.path.join(args.data, 'action_dictionary.pkl'), 'rb') as input:
@@ -92,7 +95,8 @@ if dic_exists:
 else:
     Corpus_Dic = data.Dictionary()
 
-train_data_name = os.path.join(args.data, str(args.number_per_class)+'_labeled_train.csv')
+# train_data_name = os.path.join(args.data, str(args.number_per_class)+'_labeled_train.csv')
+train_data_name = os.path.join(args.data, 'train.csv')
 test_data_name = os.path.join(args.data, 'test.csv')
 
 train_data = data.Csv_DataSet(train_data_name)
@@ -107,6 +111,7 @@ if not dic_exists:
     print("load data and save the dictionary to '{}'".
           format(os.path.join(args.data, 'action_dictionary.pkl')))
 
+#
 bitch_size = args.batch_size
 train_loader = torch.utils.data.DataLoader(dataset=train_data,
                                            batch_size=bitch_size,

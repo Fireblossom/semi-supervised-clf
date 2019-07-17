@@ -11,13 +11,13 @@ import pickle
 import lm_model as model, data
 
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM language Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
+parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
-parser.add_argument('--emsize', type=int, default=256,
+parser.add_argument('--emsize', type=int, default=128,
                     help='size of word embeddings')
-parser.add_argument('--nhid', type=int, default=512,
+parser.add_argument('--nhid', type=int, default=128,
                     help='number of hidden units per layer')
 parser.add_argument('--nlayers', type=int, default=1,
                     help='number of layers')
@@ -31,7 +31,7 @@ parser.add_argument('--epochs', type=int, default=400,
                     help='upper epoch limit')
 parser.add_argument('--batch_size', type=int, default=32, metavar='N',
                     help='batch size')
-parser.add_argument('--bptt', type=int, default=35,
+parser.add_argument('--bptt', type=int, default=20,
                     help='sequence length')
 parser.add_argument('--dropout_em', type=float, default=0.5,
                     help='dropout applied to layers (0 = no dropout)')
@@ -43,7 +43,7 @@ parser.add_argument('--tied', action='store_true',
                     help='tie the word embedding and softmax weights')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
-parser.add_argument('--cuda', action='store_true',
+parser.add_argument('--cuda', action='store_false',
                     help='use CUDA')
 parser.add_argument('--log_interval', type=int, default=10, metavar='N',
                     help='report interval')
@@ -83,7 +83,7 @@ if dic_exists:
 else:
     Corpus_Dic = data.Dictionary()
 
-train_data_name = os.path.join(args.data, 'train.csv')
+train_data_name = os.path.join(args.data, 'unlabel.txt')
 #test_data_name = os.path.join(args.data, 'test.csv')
 
 train_data = data.Csv_DataSet(train_data_name)
@@ -98,9 +98,9 @@ if not dic_exists:
     print("load data and save the dictionary to '{}'".
           format(os.path.join(args.data, 'action_dictionary.pkl')))
 
-bitch_size = args.batch_size
+batch_size = args.batch_size
 train_loader = torch.utils.data.DataLoader(dataset=train_data,
-                                           batch_size=bitch_size,
+                                           batch_size=batch_size,
                                            shuffle=True,
                                            collate_fn=data.collate_fn)
 
