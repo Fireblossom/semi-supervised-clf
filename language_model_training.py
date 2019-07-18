@@ -202,16 +202,16 @@ try:
         scheduler.step()
         loss = train()
         # Save the model if the validation loss is the best we've seen so far.
-        if total_loss > loss:
-            total_loss = loss
-            torch.save(
-                {'epoch': epoch,
-                 'model_state_dict': model.state_dict(),
-                 'scheduler': scheduler,
-                 'optimizer': optimizer.state_dict()
-                 }, resume_file)
-            print('-' * 89)
-            print("save the check point to '{}'".format(resume_file))
+        # if total_loss > loss:
+        #     total_loss = loss
+        #     torch.save(
+        #         {'epoch': epoch,
+        #          'model_state_dict': model.state_dict(),
+        #          'scheduler': scheduler,
+        #          'optimizer': optimizer.state_dict()
+        #          }, resume_file)
+        #     print('-' * 89)
+        #     print("save the check point to '{}'".format(resume_file))
 
         with open(os.path.join(args.save, 'lm_model.pt'), 'wb') as f:
             torch.save(model, f)
