@@ -165,6 +165,7 @@ def train():
                                 elapsed * 1000 / args.log_interval, cur_loss, math.exp(cur_loss)))
             total_loss = 0
             start_time = time.time()
+        return total_loss
 
 
 def export_onnx(path, batch_size, seq_len):
@@ -195,12 +196,23 @@ try:
     else:
         print("=> no checkpoint found at '{}'".format(resume_file))
         start_epoch = 1
-
+    total_loss = 9999999.0
     for epoch in range(start_epoch, args.epochs + 1):
         epoch_start_time = time.time()
         scheduler.step()
-        train()
+        loss = train()
         # Save the model if the validation loss is the best we've seen so far.
+        if total_loss > loss:
+            total_loss = loss
+            torch.save(
+                {'epoch': epoch,
+                 'model_state_dict': model.state_dict(),
+                 'scheduler': scheduler,
+                 'optimizer': optimizer.state_dict()
+                 }, resume_file)
+            print('-' * 89)
+            print("save the check point to '{}'".format(resume_file))
+
         with open(os.path.join(args.save, 'lm_model.pt'), 'wb') as f:
             torch.save(model, f)
 
