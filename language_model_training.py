@@ -50,7 +50,7 @@ parser.add_argument('--log_interval', type=int, default=10, metavar='N',
 parser.add_argument('--onnx-export', type=str, default='',
                     help='path to export the final model in onnx format')
 parser.add_argument('--save', type=str,
-                    default=os.getcwd()+'/content/drive/My Drive/experiment/target/result',
+                    default='/content/drive/My Drive/experiment/target/result',
                     help='path to save the final model')
 
 args = parser.parse_args()
