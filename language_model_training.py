@@ -11,7 +11,7 @@ import pickle
 import lm_model as model, data
 
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM language Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
+parser.add_argument('--data', type=str, default='/gdrive/My Drive/experiment/target/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
@@ -50,7 +50,7 @@ parser.add_argument('--log_interval', type=int, default=10, metavar='N',
 parser.add_argument('--onnx-export', type=str, default='',
                     help='path to export the final model in onnx format')
 parser.add_argument('--save', type=str,
-                    default=os.getcwd()+'/ag_lm_model/',
+                    default=os.getcwd()+'/gdrive/My Drive/experiment/target/result',
                     help='path to save the final model')
 
 args = parser.parse_args()
