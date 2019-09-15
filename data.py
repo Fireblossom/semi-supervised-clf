@@ -43,9 +43,12 @@ class Csv_DataSet(Dataset):
             reader = csv.reader(db_f)
             next(reader)  # skip header
             for idx, row in enumerate(reader):
-                # get actions
-
-                content = row[1]
+                # get actionsK
+                try:
+                    content = row[1]
+                except:
+                    print(row)
+                    exit()
                 content = content.strip()
                 if lowercase:
                     content = content.lower()

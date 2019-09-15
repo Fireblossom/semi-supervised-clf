@@ -29,7 +29,7 @@ parser.add_argument('--clip', type=float, default=1.0,
                     help='gradient clipping')
 parser.add_argument('--epochs', type=int, default=400,
                     help='upper epoch limit')
-parser.add_argument('--batch_size', type=int, default=32, metavar='N',
+parser.add_argument('--batch_size', type=int, default=1, metavar='N',
                     help='batch size')
 parser.add_argument('--bptt', type=int, default=35,
                     help='sequence length')
