@@ -140,7 +140,7 @@ def train():
         next_token_seqs = torch.from_numpy(np.transpose(sample_batched[1])).to(device)
         importance_seqs = torch.from_numpy(np.transpose(sample_batched[2])).float().to(device)
         hidden = model.init_hidden(token_seqs.shape[1])
-        input = bert(token_seqs)
+        input = bert(token_seqs)[0]
         output, hidden = model(input.detach(), hidden)
         element_loss = criterion(output.permute(0, 2, 1), next_token_seqs)
         loss = torch.sum(element_loss * importance_seqs) / torch.sum(importance_seqs)
