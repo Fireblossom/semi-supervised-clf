@@ -6,7 +6,8 @@ import csv
 import numpy as np
 import re
 csv.field_size_limit(sys.maxsize)
-
+from transformers import BertTokenizer
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 class Dictionary(object):
     def __init__(self):
@@ -50,6 +51,7 @@ class Csv_DataSet(Dataset):
                 except:
                     print(row)
                     exit()
+                '''
                 content = content.strip()
                 if lowercase:
                     content = content.lower()
@@ -64,6 +66,8 @@ class Csv_DataSet(Dataset):
                     else:
                         if word in dictionary.word2idx:
                             token.append(dictionary.word2idx[word])
+                '''
+                token = torch.tensor(tokenizer.encode("Hello, my dog is cute", add_special_tokens=True)).unsqueeze(0)
                 # get id
                 if int(row[0] == -1):
                     self.labels.append(int(row[0]) + 1)

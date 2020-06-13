@@ -9,6 +9,7 @@ import torch.onnx
 import numpy as np
 import pickle
 import lm_model as model, data
+from transformers import BertModel
 
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM language Model')
 parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
@@ -17,7 +18,7 @@ parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
 parser.add_argument('--emsize', type=int, default=256,
                     help='size of word embeddings')
-parser.add_argument('--nhid', type=int, default=512,
+parser.add_argument('--nhid', type=int, default=768,
                     help='number of hidden units per layer')
 parser.add_argument('--nlayers', type=int, default=1,
                     help='number of layers')
@@ -114,6 +115,7 @@ learning_rate = args.lr
 ntokens = 60000
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid,
                        args.nlayers, args.dropout_em, args.dropout_rnn, args.dropout_cl, args.tied).to(device)
+bert = BertModel.from_pretrained('bert-base-uncased').to(device)
 
 criterion = nn.CrossEntropyLoss(reduction='none')
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
@@ -138,7 +140,8 @@ def train():
         next_token_seqs = torch.from_numpy(np.transpose(sample_batched[1])).to(device)
         importance_seqs = torch.from_numpy(np.transpose(sample_batched[2])).float().to(device)
         hidden = model.init_hidden(token_seqs.shape[1])
-        output, hidden = model(token_seqs, hidden)
+        input = bert(token_seqs)
+        output, hidden = model(input.detach(), hidden)
         element_loss = criterion(output.permute(0, 2, 1), next_token_seqs)
         loss = torch.sum(element_loss * importance_seqs) / torch.sum(importance_seqs)
         # Before the backward pass, use the optimizer object to zero all of the
