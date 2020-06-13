@@ -15,7 +15,7 @@ import pandas as pd
 
 # test this method in prediction methods
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM classification Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
+parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
@@ -49,7 +49,7 @@ parser.add_argument('--tied', action='store_true',
                     help='tie the word embedding and softmax weights')
 parser.add_argument('--seed', type=int, default=1111,
                     help='random seed')
-parser.add_argument('--cuda', action='store_false',
+parser.add_argument('--cuda', action='store_true',
                     help='use CUDA')
 parser.add_argument('--log_interval', type=int, default=10, metavar='N',
                     help='report interval')
@@ -94,8 +94,8 @@ if dic_exists:
 else:
     Corpus_Dic = data.Dictionary()
 
-labeled_train_data_name = os.path.join(args.data, 'train.csv')
-unlabeled_train_data_name = os.path.join(args.data, 'unlabeled.csv')
+labeled_train_data_name = os.path.join(args.data, str(args.number_per_class)+'_labeled_train.csv')
+unlabeled_train_data_name = os.path.join(args.data, str(args.number_per_class)+'_unlabeled_train.csv')
 test_data_name = os.path.join(args.data, 'test.csv')
 
 labeled_train_data = data.Csv_DataSet(labeled_train_data_name)
@@ -147,7 +147,7 @@ print('The size of the dictionary is', len(Corpus_Dic))
 dis_learning_rate = args.lr
 judge_learning_rate = args.lr
 
-ntokens = len(Corpus_Dic)
+ntokens = 60000
 discriminator = discriminator.RNNModel(args.model, ntokens, args.emsize, args.nhid,
                        args.nlayers, args.nclass, args.dropout_em, 
                        args.dropout_rnn, args.dropout_cl, args.tied).to(device)
@@ -187,7 +187,7 @@ def dis_pre_train_step():
     discriminator.train()
     lab_token_seqs, _, _, labels, lab_seq_lengths, _ = next(labeled_train_loader)
     lab_token_seqs = torch.from_numpy(np.transpose(lab_token_seqs)).to(device)
-    labels = torch.from_numpy(np.transpose(labels)).to(device)
+    labels = torch.from_numpy(np.transpose(labels)-1).to(device)
     num_lab_sample = lab_token_seqs.shape[1]
     lab_hidden = discriminator.init_hidden(num_lab_sample)
     lab_output = discriminator(lab_token_seqs, lab_hidden, lab_seq_lengths)
@@ -223,7 +223,7 @@ def adv_train_step(judge_only=True):
     # Sample m labeled instances from DL
     lab_token_seqs, _, _, labels, lab_seq_lengths, _ = next(labeled_train_loader)
     lab_token_seqs = torch.from_numpy(np.transpose(lab_token_seqs)).to(device)
-    labels = torch.from_numpy(np.transpose(labels)).to(device)
+    labels = torch.from_numpy(np.transpose(labels)-1).to(device)
     num_lab_sample = lab_token_seqs.shape[1]
     
     # Sample m labeled instances from DU and predict their corresponding label
@@ -363,7 +363,7 @@ def evaluate():
     with torch.no_grad():
         for i_batch, sample_batched in enumerate(test_loader):
             token_seqs = torch.from_numpy(np.transpose(sample_batched[0])).to(device)
-            labels = torch.from_numpy(np.transpose(sample_batched[3])).to(device)
+            labels = torch.from_numpy(np.transpose(sample_batched[3])-1).to(device)
             seq_lengths = np.transpose(sample_batched[4])
             hidden = discriminator.init_hidden(token_seqs.shape[1])
             output = discriminator(token_seqs, hidden, seq_lengths)

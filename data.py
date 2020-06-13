@@ -39,6 +39,7 @@ class Csv_DataSet(Dataset):
         self.length = 0
 
     def load(self, lowercase=True, dictionary=None,train_mode=True):
+        print(self.file)
         with open(self.file) as db_f:
             reader = csv.reader(db_f)
             next(reader)  # skip header

@@ -83,7 +83,7 @@ if dic_exists:
 else:
     Corpus_Dic = data.Dictionary()
 
-train_data_name = os.path.join(args.data, 'unsuper_reviews.csv')
+train_data_name = os.path.join(args.data, 'test.csv')
 #test_data_name = os.path.join(args.data, 'test.csv')
 
 train_data = data.Csv_DataSet(train_data_name)
@@ -111,7 +111,7 @@ print('The size of the dictionary is', len(Corpus_Dic))
 ###############################################################################
 learning_rate = args.lr
 
-ntokens = len(Corpus_Dic)
+ntokens = 60000
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid,
                        args.nlayers, args.dropout_em, args.dropout_rnn, args.dropout_cl, args.tied).to(device)
 

@@ -1,1 +1,4 @@
 *pth.tar
+.DS_Store
+.idea/*
+__pycahce__/*
