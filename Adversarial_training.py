@@ -371,7 +371,7 @@ def evaluate():
             token_seqs = torch.from_numpy(np.transpose(sample_batched[0])).to(device)
             labels = torch.from_numpy(np.transpose(sample_batched[3])-1).to(device)
             seq_lengths = np.transpose(sample_batched[4])
-            input = bert(token_seqs)
+            input = bert(token_seqs)[0]
             hidden = discriminator.init_hidden(token_seqs.shape[1])
             output = discriminator(input, hidden, seq_lengths)
             _, predict_class = torch.max(output,1)
