@@ -130,7 +130,7 @@ print('The size of the dictionary is', len(Corpus_Dic))
 ###############################################################################
 learning_rate = args.lr
 
-ntokens = len(Corpus_Dic)
+ntokens = len(Corpus_Dic)+100
 model = model.RNNModel(args.model, ntokens, args.emsize, args.nhid,
                        args.nlayers, args.nclass, args.dropout_em, 
                        args.dropout_rnn, args.dropout_cl, args.tied).to(device)
