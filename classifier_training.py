@@ -13,7 +13,7 @@ import data
 import pandas as pd
 
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM classification Model')
-parser.add_argument('--data', type=str, default=os.getcwd()+'/target/',
+parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
