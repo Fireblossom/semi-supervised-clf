@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.onnx
 import numpy as np
 import pickle
-import discriminator_model as model
+import classifier_model as model
 import data
 import pandas as pd
 
