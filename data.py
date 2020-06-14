@@ -110,7 +110,6 @@ def collate_fn(data):
         padded_seqs = np.zeros((len(sequences), pad_length))
         for i, seq in enumerate(sequences):
             end = lengths[i]
-            print(seq)
             padded_seqs[i, :end] = seq[:end]
         return padded_seqs, lengths
 

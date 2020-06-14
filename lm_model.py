@@ -44,7 +44,7 @@ class RNNModel(nn.Module):
         self.decoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, input, hidden):
-        emb = self.drop_em(self.input)
+        emb = self.drop_em(input)
         output, hidden = self.rnn(emb, hidden)
         output = self.drop_out(output)
         decoded = self.decoder(output.view(output.size(0)*output.size(1), output.size(2)))
