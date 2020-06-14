@@ -208,6 +208,7 @@ def evaluate():
             correct += (predict_class == labels).sum().item()
         print('Accuracy of the classifier on the test data is : {:5.4f}'.format(
                 100 * correct / total))
+        print(correct,total)
         return correct / total
 
 
