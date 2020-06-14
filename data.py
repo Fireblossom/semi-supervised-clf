@@ -67,7 +67,7 @@ class Csv_DataSet(Dataset):
                         if word in dictionary.word2idx:
                             token.append(dictionary.word2idx[word])
                 '''
-                token = torch.tensor(tokenizer.encode(content, add_special_tokens=True)).unsqueeze(0)
+                token = tokenizer.encode(content, add_special_tokens=True)
                 # get id
                 if int(row[0] == -1):
                     self.labels.append(int(row[0]) + 1)
