@@ -64,7 +64,7 @@ class RNNModel(nn.Module):
         self.judge_encoder.weight.data.uniform_(-initrange, initrange)
 
     def forward(self, input, hidden, last_location, g_label):
-        emb = self.judge_drop_em(self.input)
+        emb = self.judge_drop_em(input)
         output, hidden = self.judge_rnn(emb, hidden)
         decoded = self.judge1_out(output[last_location-2, range(input.size()[1])])
         D_flabel = torch.cat((decoded, g_label), 1)

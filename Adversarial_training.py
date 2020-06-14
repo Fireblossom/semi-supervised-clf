@@ -12,6 +12,7 @@ import discriminator_model as discriminator
 import judge_model as judge
 import data
 import pandas as pd
+from transformers import BertModel
 
 # test this method in prediction methods
 parser = argparse.ArgumentParser(description='PyTorch RNN/LSTM classification Model')
@@ -19,7 +20,7 @@ parser.add_argument('--data', type=str, default=os.getcwd()+'/ag_news_csv/',
                     help='location of the data corpus')
 parser.add_argument('--model', type=str, default='LSTM',
                     help='type of recurrent net (RNN_TANH, RNN_RELU, LSTM, GRU)')
-parser.add_argument('--emsize', type=int, default=256,
+parser.add_argument('--emsize', type=int, default=768,
                     help='size of word embeddings')
 parser.add_argument('--nhid', type=int, default=512,
                     help='number of hidden units per layer')
@@ -154,6 +155,7 @@ discriminator = discriminator.RNNModel(args.model, ntokens, args.emsize, args.nh
 judger = judge.RNNModel(args.model, ntokens, args.emsize, args.nhid,
                        args.nlayers, args.nclass, args.dropout_em, 
                        args.dropout_rnn, args.dropout_cl, args.tied).to(device)
+bert = BertModel.from_pretrained('bert-base-uncased').to(device)
 
 criterion = nn.CrossEntropyLoss(reduction='none')
 criterion_judge = nn.BCELoss()
@@ -187,10 +189,11 @@ def dis_pre_train_step():
     discriminator.train()
     lab_token_seqs, _, _, labels, lab_seq_lengths, _ = next(labeled_train_loader)
     lab_token_seqs = torch.from_numpy(np.transpose(lab_token_seqs)).to(device)
+    lab_input = bert(lab_token_seqs)[0]
     labels = torch.from_numpy(np.transpose(labels)-1).to(device)
     num_lab_sample = lab_token_seqs.shape[1]
     lab_hidden = discriminator.init_hidden(num_lab_sample)
-    lab_output = discriminator(lab_token_seqs, lab_hidden, lab_seq_lengths)
+    lab_output = discriminator(lab_input.detach(), lab_hidden, lab_seq_lengths)
     lab_element_loss = criterion(lab_output, labels)
     lab_loss = torch.mean(lab_element_loss)
     # Before the backward pass, use the optimizer object to zero all of the
@@ -225,13 +228,16 @@ def adv_train_step(judge_only=True):
     lab_token_seqs = torch.from_numpy(np.transpose(lab_token_seqs)).to(device)
     labels = torch.from_numpy(np.transpose(labels)-1).to(device)
     num_lab_sample = lab_token_seqs.shape[1]
+    lab_input = bert(lab_token_seqs)[0]
     
     # Sample m labeled instances from DU and predict their corresponding label
     unl_token_seqs, _, _, _, unl_seq_lengths, _ = next(unlabeled_train_loader)
     unl_token_seqs = torch.from_numpy(np.transpose(unl_token_seqs)).to(device)
     num_unl_sample = unl_token_seqs.shape[1]
+    unl_input = bert(unl_token_seqs)[0]
+
     unl_hidden = discriminator.init_hidden(num_unl_sample)
-    unl_output = discriminator(unl_token_seqs, unl_hidden, unl_seq_lengths)
+    unl_output = discriminator(unl_input.detach(), unl_hidden, unl_seq_lengths)
     _, fake_labels = torch.max(unl_output, 1)
 
     if judge_only:
@@ -244,12 +250,12 @@ def adv_train_step(judge_only=True):
         ###############################################################################
         lab_judge_hidden = judger.init_hidden(num_lab_sample)
         one_hot_label = one_hot_embedding(labels, args.nclass).to(device)  # one hot encoder
-        lab_judge_prob = judger(lab_token_seqs, lab_judge_hidden, lab_seq_lengths, one_hot_label)
+        lab_judge_prob = judger(lab_input.detach(), lab_judge_hidden, lab_seq_lengths, one_hot_label)
         lab_labeled = torch.ones(num_lab_sample).to(device)
 
         unl_judge_hidden = judger.init_hidden(num_unl_sample)
         one_hot_unl = one_hot_embedding(fake_labels, args.nclass).to(device)  # one hot encoder
-        unl_judge_prob = judger(unl_token_seqs, unl_judge_hidden, unl_seq_lengths, one_hot_unl)
+        unl_judge_prob = judger(unl_input.detach(), unl_judge_hidden, unl_seq_lengths, one_hot_unl)
         unl_labeled = torch.zeros(num_unl_sample).to(device)
         
         if_labeled = torch.cat((lab_labeled, unl_labeled))
@@ -272,13 +278,13 @@ def adv_train_step(judge_only=True):
             # Update the predictor
             ###############################################################################
             lab_hidden = discriminator.init_hidden(num_lab_sample)
-            lab_output = discriminator(lab_token_seqs, lab_hidden, lab_seq_lengths)
+            lab_output = discriminator(lab_input.detach(), lab_hidden, lab_seq_lengths)
             lab_element_loss = criterion(lab_output, labels)
             lab_loss = torch.mean(lab_element_loss)
 
             # calculate loss for unlabeled instances
             unl_hidden = discriminator.init_hidden(num_unl_sample)
-            unl_output = discriminator(unl_token_seqs, unl_hidden, unl_seq_lengths)
+            unl_output = discriminator(unl_input.detach(), unl_hidden, unl_seq_lengths)
             unl_element_loss = criterion(unl_output, fake_labels)
             unl_loss = unl_element_loss.dot(unl_judge_prob.view(-1))/num_unl_sample
             # do not include this in version 1 
