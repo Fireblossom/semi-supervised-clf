@@ -96,7 +96,7 @@ else:
     Corpus_Dic = data.Dictionary()
 
 # train_data_name = os.path.join(args.data, str(args.number_per_class)+'_labeled_train.csv')
-train_data_name = os.path.join(args.data, 'train.csv')
+train_data_name = os.path.join(args.data, '1000_labeled_train.csv')
 test_data_name = os.path.join(args.data, 'test.csv')
 
 train_data = data.Csv_DataSet(train_data_name)
