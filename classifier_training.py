@@ -155,7 +155,7 @@ def train():
         # Starting each batch, we detach the hidden state from how it was previously produced.
         # If we didn't, the model would try backpropagating all the way to start of the dataset.
         token_seqs = torch.from_numpy(np.transpose(sample_batched[0])).to(device)
-        labels = torch.from_numpy(np.transpose(sample_batched[3])).to(device)
+        labels = torch.from_numpy(np.transpose(sample_batched[3])-1).to(device)
         seq_lengths = np.transpose(sample_batched[4])
         hidden = model.init_hidden(token_seqs.shape[1])
         output = model(token_seqs, hidden, seq_lengths)
@@ -171,7 +171,7 @@ def train():
         loss.backward()
 
         # `clip_grad_norm` helps prevent the exploding gradient problem in RNNs / LSTMs.
-        #torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), args.clip)
         optimizer.step()
 
         total_loss += loss.item()
@@ -199,7 +199,7 @@ def evaluate():
     with torch.no_grad():
         for i_batch, sample_batched in enumerate(test_loader):
             token_seqs = torch.from_numpy(np.transpose(sample_batched[0])).to(device)
-            labels = torch.from_numpy(np.transpose(sample_batched[3])).to(device)
+            labels = torch.from_numpy(np.transpose(sample_batched[3])-1).to(device)
             seq_lengths = np.transpose(sample_batched[4])
             hidden = model.init_hidden(token_seqs.shape[1])
             output = model(token_seqs, hidden, seq_lengths)
@@ -208,7 +208,6 @@ def evaluate():
             correct += (predict_class == labels).sum().item()
         print('Accuracy of the classifier on the test data is : {:5.4f}'.format(
                 100 * correct / total))
-        print(correct,total)
         return correct / total
 
 
